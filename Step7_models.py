@@ -20,42 +20,55 @@ import Step6_PCA as PCA
 
 def features_target():
     PCA.main(3)
-    dataset = pd.read_csv('./datasets/pca_datasets.csv')
-    y_1 = dataset['abnormal_return_1'].tolist()
-    y_3 = dataset['abnormal_return_3'].tolist()
-    y_5 = dataset['abnormal_return_5'].tolist()
-    y_7 = dataset['abnormal_return_7'].tolist()
+    dataset = pd.read_csv('./datasets/pca_datasets_without_macro.csv')
+    y_15 = dataset['abnormal_return_15'].tolist()
+    y_30 = dataset['abnormal_return_30'].tolist()
+    y_45 = dataset['abnormal_return_45'].tolist()
+    y_60 = dataset['abnormal_return_60'].tolist()
+    y_75 = dataset['abnormal_return_75'].tolist()
+    y_90 = dataset['abnormal_return_90'].tolist()
     del dataset['Unnamed: 0']
-    # del dataset['Unnamed: 0.1']
     del dataset['Stkcd']
     del dataset['Accper']
-    del dataset['abnormal_return_1']
-    del dataset['abnormal_return_3']
-    del dataset['abnormal_return_5']
-    del dataset['abnormal_return_7']
+    del dataset['abnormal_return_15']
+    del dataset['abnormal_return_30']
+    del dataset['abnormal_return_45']
+    del dataset['abnormal_return_60']
+    del dataset['abnormal_return_75']
+    del dataset['abnormal_return_90']
     features = dataset.values
     # print(features)
-    dataset_1 = {
+    dataset_15 = {
         'features':features,
-        'y_1':y_1
+        'y_15':y_15
     }
-    dataset_3 = {
+    dataset_30 = {
         'features':features,
-        'y_3':y_3
+        'y_30':y_30
     }
-    dataset_5 = {
+    dataset_45 = {
         'features':features,
-        'y_5':y_5
+        'y_45':y_45
     }
-    dataset_7 = {
+    dataset_60 = {
         'features':features,
-        'y_7':y_7
+        'y_60':y_60
+    }
+    dataset_75 = {
+        'features':features,
+        'y_75':y_75
+    }
+    dataset_90 = {
+        'features':features,
+        'y_90':y_90
     }
     json = {
-        'dataset_1': dataset_1,
-        'dataset_3': dataset_3,
-        'dataset_5': dataset_5,
-        'dataset_7': dataset_7,
+        'dataset_15': dataset_15,
+        'dataset_30': dataset_30,
+        'dataset_45': dataset_45,
+        'dataset_60': dataset_60,
+        'dataset_75': dataset_75,
+        'dataset_90': dataset_90,
     }
     return json
 
@@ -85,7 +98,7 @@ def CART(Dataset,dataset_Num,y_num):
     X = dataset['features']
     y = dataset[y_num]
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
-    CART = DecisionTreeRegressor(splitter='best')
+    CART = DecisionTreeRegressor(splitter='best',max_depth=3,min_samples_leaf=10000,min_impurity_decrease=0)
     CART.fit(X_train, y_train)
     prediction = CART.predict(X_test)
     print("The MSE of prediction in CART is {}".format(MSE(y_test, prediction)))
@@ -122,7 +135,7 @@ def RandomForest(Dataset,dataset_Num,y_num):
     X = dataset['features']
     y = dataset[y_num]
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
-    RF = RandomForestRegressor(max_features='auto',criterion='squared_error',bootstrap=True)
+    RF = RandomForestRegressor(n_estimators=200,max_depth=3,max_features='auto',criterion='squared_error',bootstrap=True)
     RF.fit(X_train,y_train)
     prediction = RF.predict(X_test)
     print("The MSE of prediction in RF is {}".format(MSE(y_test, prediction)))
@@ -136,7 +149,7 @@ def HistGradientBoosting(Dataset,dataset_Num,y_num):
     X = dataset['features']
     y = dataset[y_num]
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
-    HistGradientBoost = HistGradientBoostingRegressor(learning_rate=0.3,max_depth=25,max_iter=300)
+    HistGradientBoost = HistGradientBoostingRegressor(learning_rate=0.05,max_depth=5,max_iter=80)
     HistGradientBoost.fit(X_train,y_train)
     prediction = HistGradientBoost.predict(X_test)
     print("The MSE of prediction in hgb is {}".format(MSE(y_test, prediction)))
@@ -151,8 +164,11 @@ def XgBoost(Dataset,dataset_Num,y_num):
     X = dataset['features']
     y = dataset[y_num]
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
-    xgb_model = xgb.XGBRegressor(
-                                 learning_rate=0.3,
+    xgb_model = xgb.XGBRegressor(max_depth=3,
+                                 learning_rate=0.1,
+                                 subsample=0.7,
+                                 gamma=0.03,
+                                 min_child_weight=5,
                                  objective='reg:linear',
                                  n_jobs=-1)
     xgb_model.fit(X_train,y_train)
@@ -169,8 +185,8 @@ def lgb(Dataset,dataset_Num,y_num):
     X = dataset['features']
     y = dataset[y_num]
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
-    gbm = LGB.LGBMRegressor(objective='regression',num_leaves=2000,
-                            learning_rate=0.3,n_estimators=200
+    gbm = LGB.LGBMRegressor(objective='regression',num_leaves=10,
+                            learning_rate=0.1,n_estimators=31
     )
     gbm.fit(X_train, y_train, eval_set=[(X_train, y_train)],eval_metric='logloss')
     prediction = gbm.predict(X_test)
@@ -195,20 +211,22 @@ def lgb(Dataset,dataset_Num,y_num):
 
 def main():
     dataset = {
-        '1':['dataset_1','y_1'],
-        '3': ['dataset_3', 'y_3'],
-        '5': ['dataset_5', 'y_5'],
-        '7': ['dataset_7', 'y_7'],
+        '15':['dataset_15','y_15'],
+        '30': ['dataset_30', 'y_30'],
+        '45': ['dataset_45', 'y_45'],
+        '60': ['dataset_60', 'y_60'],
+        '75': ['dataset_75', 'y_75'],
+        '90': ['dataset_90', 'y_90'],
     }
-    list = ['1','3','5','7']
+    list = ['15','30','45','60','75','90']
     for i in list:
         print('The {} days abnormal return: '.format(i))
         # LR(features_target(), dataset[i][0], dataset[i][1])
         # print('-----------------------')
-        # CART(features_target(), dataset[i][0], dataset[i][1])
-        # print('-----------------------')
-        lgb(features_target(), dataset[i][0], dataset[i][1])
+        CART(features_target(), dataset[i][0], dataset[i][1])
         print('-----------------------')
+        # lgb(features_target(), dataset[i][0], dataset[i][1])
+        # print('-----------------------')
         # XgBoost(features_target(), dataset[i][0], dataset[i][1])
         # print('-----------------------')
         # HistGradientBoosting(features_target(), dataset[i][0], dataset[i][1])

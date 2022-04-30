@@ -40,7 +40,7 @@ from sklearn.decomposition import PCA
 def PCAnalysis(path,k):
     db = pd.read_csv(path)
     # print(db.head(10))
-    returns = db[['Unnamed: 0','Stkcd','Accper','abnormal_return_1','abnormal_return_3','abnormal_return_5','abnormal_return_7']]
+    returns = db[['Unnamed: 0','Stkcd','Accper','abnormal_return_15','abnormal_return_30','abnormal_return_45','abnormal_return_60','abnormal_return_75','abnormal_return_90']]
     du = db['Unnamed: 0']
     ds = db['Stkcd']
     da = db['Accper']
@@ -49,10 +49,12 @@ def PCAnalysis(path,k):
     del db['Accper']
     # del db['Typrep']
     # del db['Stknme']
-    del db['abnormal_return_1']
-    del db['abnormal_return_3']
-    del db['abnormal_return_5']
-    del db['abnormal_return_7']
+    del db['abnormal_return_15']
+    del db['abnormal_return_30']
+    del db['abnormal_return_45']
+    del db['abnormal_return_60']
+    del db['abnormal_return_75']
+    del db['abnormal_return_90']
     features = db
     # print(features.head(),features.shape)
     pca = PCA(n_components=k)
@@ -84,20 +86,21 @@ def PCAnalysis(path,k):
 def PCAnalysis_without_macro(path,k):
     db = pd.read_csv(path)
     # print(db.head(10))
-    returns = db[['Unnamed: 0','Stkcd','Accper','abnormal_return_1','abnormal_return_3','abnormal_return_5','abnormal_return_7']]
+    returns = db[['Unnamed: 0','Stkcd','Accper','abnormal_return_15','abnormal_return_30','abnormal_return_45','abnormal_return_60','abnormal_return_75','abnormal_return_90']]
     du = db['Unnamed: 0']
     ds = db['Stkcd']
     da = db['Accper']
-    del db['Unnamed: 0.1']
     del db['Unnamed: 0']
     del db['Stkcd']
     del db['Accper']
     # del db['Typrep']
     # del db['Stknme']
-    del db['abnormal_return_1']
-    del db['abnormal_return_3']
-    del db['abnormal_return_5']
-    del db['abnormal_return_7']
+    del db['abnormal_return_15']
+    del db['abnormal_return_30']
+    del db['abnormal_return_45']
+    del db['abnormal_return_60']
+    del db['abnormal_return_75']
+    del db['abnormal_return_90']
     features = db
     # print(features.head(),features.shape)
     pca = PCA(n_components=k)
@@ -127,7 +130,8 @@ def PCAnalysis_without_macro(path,k):
     # X_train = db[]
 
 def main(k):
-    PCAnalysis('./datasets/numeric_dataset.csv',k)
+    # PCAnalysis('./datasets/numeric_dataset.csv',k)
+    PCAnalysis_without_macro('./datasets/numeric_dataset_without_macro.csv',k)
 
 if __name__ == '__main__':
     # FeatureSelection(Dataset('./datasets/train_data.csv'))
